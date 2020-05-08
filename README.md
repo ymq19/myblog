@@ -29,9 +29,9 @@ npm run build
 
 暂时由一人开发，有问题请联系
 
-![wechat_code](D:\大学学习资料\web前端\myblog\src\assets\img\main\wechat_code.png)
+QQ：1976583473
 
-![weibo_code](D:\大学学习资料\web前端\myblog\src\assets\img\main\weibo_code.png)
+微信：ymq20141105
 
-![qq_code](D:\大学学习资料\web前端\myblog\src\assets\img\main\qq_code.png)
+微博：-我要喝旺仔牛奶
 
