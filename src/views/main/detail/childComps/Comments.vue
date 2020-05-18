@@ -55,7 +55,6 @@ export default {
       const articleid = this.$route.params.id
       const data = qs.stringify({articleid, page})
       commentDetail(data).then(res => {
-        console.log(res)
         for(let i = 0; i < res.data.result.length; i++) {
           this.commentList.push({
             username: res.data.result[i].username,

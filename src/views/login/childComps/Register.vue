@@ -110,13 +110,13 @@ export default {
   }
   input {
     height: 30px;
-    border: 1px #666 solid;
+    border: 1px rgb(33,32,87) solid;
     border-radius: 5px;
     padding-left: 0.5em;
   }
   input:focus {
     outline: none;
-    box-shadow: 0 0 10px #91b4ff;
+    box-shadow: 0 0 3px rgb(33,32,87);
   }
   input::-webkit-input-placeholder {
     color: #ccc;
@@ -140,7 +140,7 @@ export default {
     color: #fff;
   }
   button:hover {
-    background-color: #91b4ff;
+    background-color: rgb(33,32,87);
   }
   button:focus,button:active {
     width: 180px;

@@ -1,7 +1,17 @@
 <template>
   <div class="nav-bar">
     <div><img src="~assets/img/main/title.png" alt="漻淤小路"></div>
-    <div><input type="text" class="search"></div>
+    <div class="search-list">
+      <input type="text" class="search" v-model="content" @keyup="throttle" @blur="blur">
+      <ul v-show="isList" class="show-list">
+        <li v-for="(item, index) in dataList" :key="index" class="hover-list clear-fix" @mousedown="itemClick(item.id)">
+          <span class="normal">{{ item.frontTitle }}</span>
+          <span class="high-light">{{ item.hightLightTitle }}</span>
+          <span class="normal">{{ item.backTitle }}</span>
+          <span class="author">{{ item.author }}</span>
+        </li>
+      </ul>
+    </div>
     <div class="login-message">
       <div class="login-setting">
         <img src="~assets/img/main/waves.gif" alt="水纹">
@@ -23,12 +33,18 @@
 </template>
 
 <script>
+import { searchDetail } from 'network/searchDetail'
+import { searchBlog } from 'network/search'
+import { debounce } from 'common/debounce'
 export default {
   name: 'NavBar',
   data() {
     return {
       isShow: false,
-      isClick: false
+      isClick: false,
+      isList: false,
+      content: '',
+      dataList: []
     }
   },
   computed: {
@@ -55,6 +71,74 @@ export default {
     letShow() {
       this.isShow = !this.isShow
       this.isClick = !this.isClick
+    },
+    blur() {
+      this.isList = false
+    },
+    search() {
+      // console.log(this.content)
+      // 发送axios请求
+      const content = this.content
+      searchBlog({content}).then(res => {
+        this.dataList = []
+        if(res.data.result.length === 0) {
+          this.dataList.push({backTitle: '搜索为空'})
+          this.isList = true
+          return
+        }
+        for(let i = 0; i < res.data.result.length; i++) {
+          const frontTitle = res.data.result[i].title.substring(0, res.data.result[i].title.indexOf(content))
+          const hightLightTitle = content
+          const backTitle = res.data.result[i].title.substring(res.data.result[i].title.indexOf(content) + content.length)
+          this.dataList.push({
+            frontTitle,
+            hightLightTitle,
+            backTitle,
+            author: res.data.result[i].author,
+            id: res.data.result[i].articleid
+          })
+        }
+        this.isList = true
+      }).catch(err => {
+        console.log(err)
+      })
+    },
+    throttle() {
+      
+      const preContent = this.content
+      const search = debounce(this.search, 1000)
+      setTimeout(() => {
+        const nowContent = this.content
+        if(nowContent === preContent) {
+          if(nowContent === '') {
+            this.dataList = []
+            this.isList = false
+            return
+          }
+          search()
+        }
+      }, 300)
+    },
+    itemClick(id) {
+      if(this.dataList[0].backTitle === '搜索为空') {
+        return
+      }
+      const username = this.$store.state.user.username
+      searchDetail({id, username}).then(res => {
+        this.$store.commit('articleMessage', {
+          title: res.data.contact[0].title,
+          author: res.data.contact[0].author,
+          views: res.data.contact[0].views,
+          likes: res.data.contact[0].likes,
+          comments: res.data.contact[0].comments,
+          time: res.data.contact[0].time,
+          isLike: res.data.isLike
+        })
+      }).catch(err => {
+        console.log(err)
+      })
+      this.content = ''
+      this.$router.push('/main/blog/detail/' + id)
     }
   }
 }
@@ -70,6 +154,9 @@ export default {
     padding: 12px;
     border-bottom: 1px #cfd4db solid;
   }
+  .search-list {
+    position: relative;
+  }
   .search {
     height: 25px;
     margin-top: 6.5px;
@@ -80,7 +167,38 @@ export default {
   }
   .search:focus {
     border-color: #91b4ff;
+    box-shadow: 0 0 5px #91b4ff;
     outline: none;
+  }
+  .show-list {
+    position: absolute;
+    z-index: 3000;
+    width: 100%;
+    list-style: none;
+    margin-top: 10px;
+    padding: 10px;
+    border-radius: 10px;
+    background-color: rgb(245,249,255);
+  }
+  .hover-list {
+    margin-bottom: .2em;
+    padding-left: .2em;
+    border-radius: 5px;
+  }
+  .hover-list:hover {
+    background-color: rgb(211,225,255);
+    cursor: pointer;
+  }
+  .high-light {
+    color: black;
+  }
+  .normal {
+    color: #cfd4db;
+  }
+  .author {
+    float: right;
+    font-size: 80%;
+    margin-top: .2em;
   }
   .login-message {
     display: flex;
